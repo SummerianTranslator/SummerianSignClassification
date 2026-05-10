@@ -1,4 +1,3 @@
-import os
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -11,6 +10,7 @@ import yaml
 from PIL import Image
 from torch import nn
 from torch.optim import Adam
+from torch.optim.lr_scheduler import CosineAnnealingLR
 from torch.utils.data import DataLoader, Dataset
 from torchmetrics.classification import (
     MulticlassAccuracy,
@@ -63,6 +63,10 @@ class TrainConfig:
     learning_rate: float
     num_epochs: int
     output_folder: str
+    weight_decay: float
+    scheduler_name: str | None
+    scheduler_t_max: int
+    scheduler_eta_min: float
 
 
 def load_config(config_path: str) -> TrainConfig:
@@ -84,6 +88,14 @@ def load_config(config_path: str) -> TrainConfig:
         learning_rate=float(raw_config["learning_rate"]),
         num_epochs=int(raw_config["num_epochs"]),
         output_folder=str(raw_config["output_folder"]),
+        weight_decay=float(raw_config.get("weight_decay", 0.0)),
+        scheduler_name=(
+            str(raw_config["scheduler_name"]).strip().lower()
+            if raw_config.get("scheduler_name") is not None
+            else None
+        ),
+        scheduler_t_max=int(raw_config.get("scheduler_t_max", raw_config["num_epochs"])),
+        scheduler_eta_min=float(raw_config.get("scheduler_eta_min", 0.0)),
     )
 
 
@@ -303,12 +315,25 @@ def build_model(model_name: str, num_classes: int) -> nn.Module:
 
 
 class SignClassifier(pl.LightningModule):
-    def __init__(self, model_name: str, num_classes: int, learning_rate: float):
+    def __init__(
+        self,
+        model_name: str,
+        num_classes: int,
+        learning_rate: float,
+        weight_decay: float = 0.0,
+        scheduler_name: str | None = None,
+        scheduler_t_max: int = 1,
+        scheduler_eta_min: float = 0.0,
+    ):
         super().__init__()
         self.save_hyperparameters()
         self.model = build_model(model_name=model_name, num_classes=num_classes)
         self.loss_fn = nn.CrossEntropyLoss()
         self.learning_rate = learning_rate
+        self.weight_decay = weight_decay
+        self.scheduler_name = scheduler_name
+        self.scheduler_t_max = max(1, scheduler_t_max)
+        self.scheduler_eta_min = scheduler_eta_min
 
         self.train_accuracy = MulticlassAccuracy(num_classes=num_classes)
         self.val_accuracy = MulticlassAccuracy(num_classes=num_classes)
@@ -336,8 +361,30 @@ class SignClassifier(pl.LightningModule):
         output = self.model(x)
         return get_model_logits(output)
 
-    def configure_optimizers(self) -> Adam:
-        return Adam(self.parameters(), lr=self.learning_rate)
+    def configure_optimizers(self) -> Any:
+        optimizer = Adam(
+            self.parameters(),
+            lr=self.learning_rate,
+            weight_decay=self.weight_decay,
+        )
+        if self.scheduler_name is None:
+            return optimizer
+
+        if self.scheduler_name == "cosine":
+            scheduler = CosineAnnealingLR(
+                optimizer,
+                T_max=self.scheduler_t_max,
+                eta_min=self.scheduler_eta_min,
+            )
+            return {
+                "optimizer": optimizer,
+                "lr_scheduler": {"scheduler": scheduler, "interval": "epoch"},
+            }
+
+        raise ValueError(
+            f"Unsupported scheduler_name='{self.scheduler_name}'. "
+            "Supported values: null, cosine."
+        )
 
     def training_step(
         self, batch: tuple[torch.Tensor, torch.Tensor], batch_idx: int

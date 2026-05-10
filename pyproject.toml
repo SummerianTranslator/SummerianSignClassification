@@ -37,7 +37,12 @@ default = true
 name = "pytorch-cu126"
 url = "https://download.pytorch.org/whl/cu126"
 
+
 [dependency-groups]
 dev = [
     "ruff>=0.15.12",
 ]
+
+[tool.ruff]
+# Skip run linter on jupyter notebook files
+extend-exclude = ["*.ipynb"]
