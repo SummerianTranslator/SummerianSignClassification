@@ -1,0 +1,13 @@
+model_name: convnext:facebook/convnext-base-224
+train_path: dataset/splits/train.csv
+val_path: dataset/splits/val.csv
+test_path: dataset/splits/test.csv
+image_folder: signs_snippets_archive
+batch_size: 32
+learning_rate: 0.0002
+weight_decay: 0.0001
+scheduler_name: cosine
+scheduler_t_max: 20
+scheduler_eta_min: 0.000001
+num_epochs: 20
+output_folder: outputs/ablation/convnext_base_224_03_lr_2e4
