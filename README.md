@@ -80,6 +80,32 @@ You can use other configs from `configs/` (for example, `swin_t.yaml`).
 uv run evaluate.py --config configs/vit_b_16.yaml
 ```
 
+### 4) Run Gradio demo app
+
+Run the web demo for single-image inference:
+
+```bash
+uv run demo_app.py \
+  --configs configs/vit_b_16.yaml \
+  --ckpt-path outputs/vit_b_16/checkpoints/last.ckpt
+```
+
+You can also use `--config` instead of `--configs`.
+
+Optional server arguments:
+
+- `--server-name` (default: `127.0.0.1`)
+- `--server-port` (default: `7860`)
+
+Example with a custom port:
+
+```bash
+uv run demo_app.py \
+  --config configs/convnext_base_224.yaml \
+  --ckpt-path outputs/convnext_base_224/checkpoints/last.ckpt \
+  --server-port 7861
+```
+
 ## Configuration
 
 Each YAML config defines:
