@@ -1,0 +1,26 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# dataset files
+signs_snippets_archive.tar.gz
+signs_snippets_metadata.json
+signs_snippets_archive/*
+dataset/splits/*
+
+# output files
+outputs/*
+
+# jupyter notebook checkpoints
+.ipynb_checkpoints/*
+
+# ruff linting files
+.ruff_cache/
+.ruff_cache/*

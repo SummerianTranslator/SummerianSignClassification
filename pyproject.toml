@@ -1,0 +1,42 @@
+[project]
+name = "summerian-sign-classification"
+version = "0.1.0"
+description = "Project for classification different summerian signs from cuneiforms"
+readme = "README.md"
+requires-python = ">=3.12, <3.14"
+dependencies = [
+    "albumentations>=2.0.8",
+    "beautifulsoup4>=4.12.0",
+    "jupyter>=1.1.1",
+    "matplotlib>=3.10.0",
+    "opencv-python-headless>=4.10.0.84",
+    "pandas>=3.0.2",
+    "pillow>=11.0.0",
+    "polars>=1.40.1",
+    "pytorch-lightning>=2.6.1",
+    "pyyaml>=6.0.2",
+    "scikit-learn>=1.8.0",
+    "torch>=2.11.0",
+    "torchaudio>=2.11.0",
+    "transformers>=4.57.1",
+    "torchvision>=0.26.0",
+]
+
+authors = [
+    {name = "Maxim Partin", email = "max.physmath.05@gmail.com"},
+    {name = "Michael Gadiev", email = "migadiev@edu.hse.ru"}
+]
+
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple"
+default = true
+
+[[tool.uv.index]]
+name = "pytorch-cu126"
+url = "https://download.pytorch.org/whl/cu126"
+
+[dependency-groups]
+dev = [
+    "ruff>=0.15.12",
+]

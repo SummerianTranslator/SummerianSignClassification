@@ -1,0 +1,9 @@
+model_name: efficientnet_b0
+train_path: dataset/splits/train.csv
+val_path: dataset/splits/val.csv
+test_path: dataset/splits/test.csv
+image_folder: signs_snippets_archive
+batch_size: 64
+learning_rate: 0.001
+num_epochs: 10
+output_folder: outputs/efficientnet_b0
